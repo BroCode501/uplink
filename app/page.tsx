@@ -154,23 +154,35 @@ export default function Home() {
              </div>
 
              {/* Community Projects */}
-             <div>
-               <h3 className="font-semibold mb-4">Community Tools</h3>
-               <ul className="space-y-2 text-sm">
-                 <li>
-                   <a 
-                     href="https://shareb.in/" 
-                     target="_blank" 
-                     rel="noopener noreferrer"
-                     className="text-amber-700 dark:text-amber-400 hover:underline flex items-center gap-1 w-fit"
-                   >
-                     Shareb.in
-                     <ExternalLink className="w-3 h-3" />
-                   </a>
-                   <p className="text-xs text-muted-foreground mt-1">File sharing by Nnisarg gada</p>
-                 </li>
-               </ul>
-             </div>
+              <div>
+                <h3 className="font-semibold mb-4">Community Tools</h3>
+                <ul className="space-y-3 text-sm">
+                  <li>
+                    <a 
+                      href="https://shareb.in/" 
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                      className="text-amber-700 dark:text-amber-400 hover:underline flex items-center gap-1 w-fit"
+                    >
+                      Shareb.in
+                      <ExternalLink className="w-3 h-3" />
+                    </a>
+                    <p className="text-xs text-muted-foreground mt-1">File sharing by BroCode</p>
+                  </li>
+                  <li>
+                    <a 
+                      href="https://vericert.neopanda.tech/" 
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                      className="text-amber-700 dark:text-amber-400 hover:underline flex items-center gap-1 w-fit"
+                    >
+                      Vericert
+                      <ExternalLink className="w-3 h-3" />
+                    </a>
+                    <p className="text-xs text-muted-foreground mt-1">Certificate verification by BroCode</p>
+                  </li>
+                </ul>
+              </div>
 
              {/* Tech Stack */}
              <div>
