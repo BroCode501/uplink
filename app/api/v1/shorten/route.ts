@@ -1,0 +1,213 @@
+import { createClient } from "@/lib/supabase/server";
+import { generateShortCode, isValidUrl, isValidCustomSlug, calculateExpiration } from "@/lib/urlShortener";
+import { NextRequest, NextResponse } from "next/server";
+
+/**
+ * Simple Public API for creating shortened URLs
+ * 
+ * POST /api/v1/shorten
+ * 
+ * Request body:
+ * {
+ *   "url": "https://example.com/very/long/url",
+ *   "slug": "optional-custom-slug",
+ *   "permanent": true
+ * }
+ * 
+ * Response (201):
+ * {
+ *   "success": true,
+ *   "shortUrl": "https://meetra.live/abc123",
+ *   "code": "abc123",
+ *   "originalUrl": "https://example.com/very/long/url",
+ *   "permanent": true,
+ *   "expiresAt": "2025-01-26T19:22:05.000Z"
+ * }
+ * 
+ * Error Response (400, 409, 500):
+ * {
+ *   "success": false,
+ *   "error": "Error message"
+ * }
+ */
+
+export async function POST(request: NextRequest) {
+  try {
+    const supabase = await createClient();
+    const body = await request.json();
+
+    const { url, slug, permanent } = body;
+
+    // Validate required field
+    if (!url) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: "URL is required. Use 'url' field in request body.",
+        },
+        { status: 400 }
+      );
+    }
+
+    // Validate URL format
+    if (!isValidUrl(url)) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: "Invalid URL format. Must start with http:// or https://",
+        },
+        { status: 400 }
+      );
+    }
+
+    // Determine the short code
+    let shortCode: string = "";
+    if (slug) {
+      // Validate custom slug
+      if (!isValidCustomSlug(slug)) {
+        return NextResponse.json(
+          {
+            success: false,
+            error: "Invalid slug. Use 2-50 alphanumeric characters, hyphens, or underscores.",
+          },
+          { status: 400 }
+        );
+      }
+
+      // Check if custom slug already exists
+      const { data: existing } = await supabase
+        .from("short_urls")
+        .select("id")
+        .eq("short_code", slug)
+        .single();
+
+      if (existing) {
+        return NextResponse.json(
+          {
+            success: false,
+            error: "This slug is already taken. Try a different one.",
+          },
+          { status: 409 }
+        );
+      }
+
+      shortCode = slug;
+    } else {
+      // Generate unique short code
+      let isUnique = false;
+      let attempts = 0;
+      const maxAttempts = 10;
+
+      while (!isUnique && attempts < maxAttempts) {
+        const code = generateShortCode(8);
+        const { data: existing } = await supabase
+          .from("short_urls")
+          .select("id")
+          .eq("short_code", code)
+          .single();
+
+        if (!existing) {
+          shortCode = code;
+          isUnique = true;
+        }
+        attempts++;
+      }
+
+      if (!isUnique) {
+        return NextResponse.json(
+          {
+            success: false,
+            error: "Failed to generate unique short code. Please try again.",
+          },
+          { status: 500 }
+        );
+      }
+    }
+
+    // Calculate expiration
+    const expiresAt = calculateExpiration(permanent === true);
+
+    // Create short URL - no user_id required for public API
+    const { data, error } = await supabase
+      .from("short_urls")
+      .insert({
+        user_id: null, // Public links have no owner
+        original_url: url,
+        short_code: shortCode,
+        custom_slug: slug || null,
+        is_permanent: permanent === true,
+        expires_at: expiresAt,
+        click_count: 0,
+      })
+      .select()
+      .single();
+
+    if (error) {
+      console.error("Database error:", error);
+      return NextResponse.json(
+        {
+          success: false,
+          error: "Failed to create short URL. Please try again.",
+        },
+        { status: 500 }
+      );
+    }
+
+    // Get the current domain from request
+    const host = request.headers.get("host") || "meetra.live";
+    const protocol = request.headers.get("x-forwarded-proto") || "https";
+    const shortUrl = `${protocol}://${host}/${shortCode}`;
+
+    return NextResponse.json(
+      {
+        success: true,
+        shortUrl,
+        code: shortCode,
+        originalUrl: url,
+        permanent: permanent === true,
+        expiresAt: expiresAt,
+      },
+      { status: 201 }
+    );
+  } catch (error) {
+    console.error("API error:", error);
+    return NextResponse.json(
+      {
+        success: false,
+        error: "Internal server error. Please try again later.",
+      },
+      { status: 500 }
+    );
+  }
+}
+
+export async function GET() {
+  return NextResponse.json(
+    {
+      success: true,
+      message: "Uplink Simple API v1",
+      endpoint: "POST /api/v1/shorten",
+      description: "Create shortened URLs without authentication",
+      example: {
+        request: {
+          method: "POST",
+          url: "/api/v1/shorten",
+          body: {
+            url: "https://example.com/very/long/url",
+            slug: "optional-custom-slug",
+            permanent: true,
+          },
+        },
+        response: {
+          success: true,
+          shortUrl: "https://meetra.live/abc123",
+          code: "abc123",
+          originalUrl: "https://example.com/very/long/url",
+          permanent: true,
+          expiresAt: "2025-01-26T19:22:05.000Z",
+        },
+      },
+    },
+    { status: 200 }
+  );
+}
