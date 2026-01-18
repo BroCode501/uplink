@@ -21,16 +21,32 @@ CREATE TABLE url_clicks (
   user_agent TEXT
 );
 
+-- Create api_tokens table for token-based API authentication
+CREATE TABLE api_tokens (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+  token_hash VARCHAR(255) UNIQUE NOT NULL,
+  name VARCHAR(100) NOT NULL,
+  description TEXT,
+  created_at TIMESTAMP DEFAULT now(),
+  last_used_at TIMESTAMP,
+  expires_at TIMESTAMP,
+  is_active BOOLEAN DEFAULT true
+);
+
 -- Create indexes for performance
 CREATE INDEX idx_short_urls_short_code ON short_urls(short_code);
 CREATE INDEX idx_short_urls_user_id ON short_urls(user_id);
 CREATE INDEX idx_short_urls_created_at ON short_urls(created_at DESC);
 CREATE INDEX idx_url_clicks_short_url_id ON url_clicks(short_url_id);
 CREATE INDEX idx_url_clicks_clicked_at ON url_clicks(clicked_at DESC);
+CREATE INDEX idx_api_tokens_user_id ON api_tokens(user_id);
+CREATE INDEX idx_api_tokens_token_hash ON api_tokens(token_hash);
 
 -- Enable Row Level Security
 ALTER TABLE short_urls ENABLE ROW LEVEL SECURITY;
 ALTER TABLE url_clicks ENABLE ROW LEVEL SECURITY;
+ALTER TABLE api_tokens ENABLE ROW LEVEL SECURITY;
 
 -- RLS Policies for short_urls
 CREATE POLICY "Users can view their own short URLs"
@@ -66,3 +82,25 @@ CREATE POLICY "System can insert clicks"
   ON url_clicks
   FOR INSERT
   WITH CHECK (true);
+
+-- RLS Policies for api_tokens
+CREATE POLICY "Users can view their own API tokens"
+  ON api_tokens
+  FOR SELECT
+  USING (auth.uid() = user_id);
+
+CREATE POLICY "Users can insert their own API tokens"
+  ON api_tokens
+  FOR INSERT
+  WITH CHECK (auth.uid() = user_id);
+
+CREATE POLICY "Users can update their own API tokens"
+  ON api_tokens
+  FOR UPDATE
+  USING (auth.uid() = user_id)
+  WITH CHECK (auth.uid() = user_id);
+
+CREATE POLICY "Users can delete their own API tokens"
+  ON api_tokens
+  FOR DELETE
+  USING (auth.uid() = user_id);

@@ -2,6 +2,7 @@ import { createClient } from "@/lib/supabase/server";
 import { generateShortCode, isValidUrl, isValidCustomSlug, calculateExpiration } from "@/lib/urlShortener";
 import { NextRequest, NextResponse } from "next/server";
 import { checkRateLimit, addRateLimitHeaders, createRateLimitResponse } from "@/lib/rate-limit";
+import { extractToken, hashToken } from "@/lib/token-utils";
 
 /**
  * Simple Public API for creating shortened URLs
@@ -44,7 +45,80 @@ export async function POST(request: NextRequest) {
       return createRateLimitResponse(rateLimitResult);
     }
 
+    // Get and validate token from Authorization header
+    const authHeader = request.headers.get("authorization");
+    if (!authHeader) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: "Missing Authorization header. Use: Authorization: Bearer uplink_xxx",
+        },
+        { status: 401 }
+      );
+    }
+
+    const token = extractToken(authHeader);
+    if (!token) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: "Invalid Authorization header format. Use: Authorization: Bearer uplink_xxx",
+        },
+        { status: 401 }
+      );
+    }
+
+    // Verify token in database
     const supabase = await createClient();
+    const tokenHash = hashToken(token);
+
+    const { data: tokenRecord, error: tokenError } = await supabase
+      .from("api_tokens")
+      .select("id, user_id, is_active, expires_at")
+      .eq("token_hash", tokenHash)
+      .single();
+
+    if (tokenError || !tokenRecord) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: "Invalid API token",
+        },
+        { status: 401 }
+      );
+    }
+
+    // Check if token is active
+    if (!tokenRecord.is_active) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: "API token is disabled",
+        },
+        { status: 401 }
+      );
+    }
+
+    // Check if token has expired
+    if (tokenRecord.expires_at) {
+      const expiresAt = new Date(tokenRecord.expires_at);
+      if (expiresAt < new Date()) {
+        return NextResponse.json(
+          {
+            success: false,
+            error: "API token has expired",
+          },
+          { status: 401 }
+        );
+      }
+    }
+
+    // Update last_used_at (async, don't wait)
+    void supabase
+      .from("api_tokens")
+      .update({ last_used_at: new Date().toISOString() })
+      .eq("id", tokenRecord.id);
+
     const body = await request.json();
 
     const { url, slug, permanent } = body;
@@ -138,11 +212,11 @@ export async function POST(request: NextRequest) {
     // Calculate expiration
     const expiresAt = calculateExpiration(permanent === true);
 
-    // Create short URL - no user_id required for public API
+    // Create short URL - now associated with authenticated user
     const { data, error } = await supabase
       .from("short_urls")
       .insert({
-        user_id: null, // Public links have no owner
+        user_id: tokenRecord.user_id,
         original_url: url,
         short_code: shortCode,
         custom_slug: slug || null,
