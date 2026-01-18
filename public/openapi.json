@@ -2,7 +2,7 @@
   "openapi": "3.0.0",
   "info": {
     "title": "Uplink Simple API",
-    "description": "Dead simple URL shortening API. No authentication required. Create shortened URLs instantly.",
+    "description": "Dead simple URL shortening API. Token-based authentication required. Create shortened URLs instantly.",
     "version": "1.0.0",
     "contact": {
       "name": "BroCode Tech Community",
@@ -28,9 +28,14 @@
     "/api/v1/shorten": {
       "post": {
         "summary": "Create a shortened URL",
-        "description": "Create a shortened URL instantly without authentication. Supports custom slugs and permanent links.",
+        "description": "Create a shortened URL instantly. Requires API token authentication. Supports custom slugs and permanent links.",
         "operationId": "createShortUrl",
         "tags": ["URL Shortening"],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
         "requestBody": {
           "required": true,
           "content": {
@@ -79,6 +84,39 @@
                   "originalUrl": "https://example.com/very/long/url",
                   "permanent": false,
                   "expiresAt": "2025-01-26T19:22:05.000Z"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized - missing or invalid API token",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                },
+                "examples": {
+                  "missingToken": {
+                    "summary": "Missing Authorization header",
+                    "value": {
+                      "success": false,
+                      "error": "Missing Authorization header. Use: Authorization: Bearer uplink_xxx"
+                    }
+                  },
+                  "invalidToken": {
+                    "summary": "Invalid token",
+                    "value": {
+                      "success": false,
+                      "error": "Invalid API token"
+                    }
+                  },
+                  "expiredToken": {
+                    "summary": "Token expired",
+                    "value": {
+                      "success": false,
+                      "error": "API token has expired"
+                    }
+                  }
                 }
               }
             }
@@ -251,6 +289,14 @@
     }
   },
   "components": {
+    "securitySchemes": {
+      "BearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "uplink_token",
+        "description": "API token in format: uplink_xxxxxxxxxxxxxxxxxxxxxxxxxxxx. Get one from your dashboard under 'API Tokens'."
+      }
+    },
     "schemas": {
       "ShortenRequest": {
         "type": "object",

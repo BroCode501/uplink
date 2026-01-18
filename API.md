@@ -1,8 +1,31 @@
 # Uplink Simple API v1
 
-Dead simple API for creating shortened URLs. No authentication required. Perfect for integrating Uplink into other applications.
+Dead simple API for creating shortened URLs. **Token authentication required.**
 
 > **Note:** Replace `your-domain.com` in all examples below with your configured Uplink domain. Examples use `meetra.live` as a placeholder.
+
+## Authentication
+
+The API requires token-based authentication. Each request must include an `Authorization` header with your API token.
+
+### Getting an API Token
+
+1. Log in to your Uplink dashboard
+2. Go to "API Tokens" section
+3. Click "Generate New Token"
+4. Give it a name and optional description
+5. Choose expiration (7 days, 30 days, 90 days, 1 year, or never)
+6. **Copy the token immediately** - you won't be able to see it again!
+
+Token format: `uplink_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx` (50+ characters)
+
+### Using Your Token
+
+Include the token in the `Authorization` header of every request:
+
+```
+Authorization: Bearer uplink_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+```
 
 ## Quick Start
 
@@ -11,6 +34,7 @@ Dead simple API for creating shortened URLs. No authentication required. Perfect
 ```bash
 curl -X POST https://your-domain.com/api/v1/shorten \
   -H "Content-Type: application/json" \
+  -H "Authorization: Bearer uplink_your_token_here" \
   -d '{
     "url": "https://example.com/very/long/url"
   }'
@@ -70,6 +94,31 @@ Create a shortened URL instantly.
 
 ## Error Responses
 
+### 401 Unauthorized
+
+Missing, invalid, or expired API token.
+
+```json
+{
+  "success": false,
+  "error": "Missing Authorization header. Use: Authorization: Bearer uplink_xxx"
+}
+```
+
+```json
+{
+  "success": false,
+  "error": "Invalid API token"
+}
+```
+
+```json
+{
+  "success": false,
+  "error": "API token has expired"
+}
+```
+
 ### 400 Bad Request
 
 Missing or invalid required field.
@@ -110,10 +159,12 @@ Server-side error occurred.
 ### JavaScript / Node.js
 
 ```javascript
+const token = 'uplink_your_token_here';
 const response = await fetch('https://your-domain.com/api/v1/shorten', {
   method: 'POST',
   headers: {
     'Content-Type': 'application/json',
+    'Authorization': `Bearer ${token}`,
   },
   body: JSON.stringify({
     url: 'https://example.com/very/long/url',
@@ -121,7 +172,12 @@ const response = await fetch('https://your-domain.com/api/v1/shorten', {
 });
 
 const data = await response.json();
-console.log(data.shortUrl); // https://your-domain.com/abc123
+
+if (data.success) {
+  console.log('Short URL:', data.shortUrl);
+} else {
+  console.error('Error:', data.error);
+}
 ```
 
 ### Python
@@ -129,18 +185,31 @@ console.log(data.shortUrl); // https://your-domain.com/abc123
 ```python
 import requests
 
-response = requests.post('https://your-domain.com/api/v1/shorten', json={
-    'url': 'https://example.com/very/long/url'
-})
+token = 'uplink_your_token_here'
+headers = {
+    'Content-Type': 'application/json',
+    'Authorization': f'Bearer {token}',
+}
+
+response = requests.post(
+    'https://your-domain.com/api/v1/shorten',
+    json={'url': 'https://example.com/very/long/url'},
+    headers=headers
+)
 
 data = response.json()
-print(data['shortUrl'])  # https://your-domain.com/abc123
+
+if data['success']:
+    print(f"Short URL: {data['shortUrl']}")
+else:
+    print(f"Error: {data['error']}")
 ```
 
 ### PHP
 
 ```php
 <?php
+$token = 'uplink_your_token_here';
 $curl = curl_init();
 
 curl_setopt_array($curl, array(
@@ -149,7 +218,10 @@ curl_setopt_array($curl, array(
   CURLOPT_POSTFIELDS => json_encode([
     'url' => 'https://example.com/very/long/url'
   ]),
-  CURLOPT_HTTPHEADER => array('Content-Type: application/json'),
+  CURLOPT_HTTPHEADER => array(
+    'Content-Type: application/json',
+    "Authorization: Bearer $token"
+  ),
   CURLOPT_RETURNTRANSFER => true,
 ));
 
@@ -158,7 +230,6 @@ $data = json_decode($response, true);
 
 if ($data['success']) {
     echo "Short URL: " . $data['shortUrl'] . PHP_EOL;
-    echo "Code: " . $data['code'] . PHP_EOL;
 } else {
     echo "Error: " . $data['error'] . PHP_EOL;
 }
@@ -181,16 +252,24 @@ import (
 )
 
 func main() {
+	token := "uplink_your_token_here"
+	
 	payload := map[string]interface{}{
 		"url": "https://example.com/very/long/url",
 	}
 
 	body, _ := json.Marshal(payload)
-	resp, _ := http.Post(
+	req, _ := http.NewRequest(
+		"POST",
 		"https://your-domain.com/api/v1/shorten",
-		"application/json",
 		bytes.NewBuffer(body),
 	)
+	
+	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", token))
+
+	client := &http.Client{}
+	resp, _ := client.Do(req)
 	defer resp.Body.Close()
 
 	respBody, _ := io.ReadAll(resp.Body)
@@ -199,7 +278,6 @@ func main() {
 
 	if data["success"].(bool) {
 		fmt.Println("Short URL:", data["shortUrl"])
-		fmt.Println("Code:", data["code"])
 	} else {
 		fmt.Println("Error:", data["error"])
 	}
@@ -209,14 +287,18 @@ func main() {
 ### cURL
 
 ```bash
+TOKEN="uplink_your_token_here"
+
 # Basic usage
 curl -X POST https://your-domain.com/api/v1/shorten \
   -H "Content-Type: application/json" \
+  -H "Authorization: Bearer $TOKEN" \
   -d '{"url":"https://example.com/very/long/url"}'
 
 # With custom slug
 curl -X POST https://your-domain.com/api/v1/shorten \
   -H "Content-Type: application/json" \
+  -H "Authorization: Bearer $TOKEN" \
   -d '{
     "url":"https://example.com/very/long/url",
     "slug":"my-link"
@@ -225,6 +307,7 @@ curl -X POST https://your-domain.com/api/v1/shorten \
 # Permanent link
 curl -X POST https://your-domain.com/api/v1/shorten \
   -H "Content-Type: application/json" \
+  -H "Authorization: Bearer $TOKEN" \
   -d '{
     "url":"https://example.com/very/long/url",
     "permanent":true
@@ -335,23 +418,38 @@ If you need higher limits for legitimate use, contact the BroCode Tech Community
 
 ## FAQ
 
+**Q: Do I need authentication?**  
+A: Yes! You need an API token to use the public API. Generate one in your dashboard under "API Tokens" section.
+
+**Q: Where do I get my API token?**  
+A: Log in to your Uplink dashboard, go to "API Tokens", and click "Generate New Token". Copy it immediately - you won't be able to see it again!
+
+**Q: How long do my tokens last?**  
+A: As long as you set them to. When generating a token, choose: 7 days, 30 days, 90 days, 1 year, or never expires.
+
+**Q: What if I lose my token?**  
+A: You can't recover it. Delete the token in your dashboard and generate a new one.
+
+**Q: Can I rotate my tokens?**  
+A: Yes! Generate a new token, update your apps to use it, then delete the old token.
+
 **Q: Can I track clicks on my links?**  
-A: Not through the simple API. Use the authenticated Uplink dashboard for analytics.
+A: Yes! Use the Uplink dashboard to see analytics for all your links (both API and dashboard created).
 
 **Q: How long do temporary links last?**  
 A: 30 days by default. Set `permanent: true` for links that never expire.
 
-**Q: Can I delete links?**  
-A: Not through the simple API. Use the authenticated dashboard to manage links.
+**Q: Can I delete links via the API?**  
+A: Use the authenticated dashboard to manage and delete links.
 
 **Q: Can I use this with other Uplink domains?**  
 A: Yes! The API works from any configured domain. All configured domains are identical and use the same database. Links created on one domain work on all domains.
 
 **Q: How many links can I create?**  
-A: Unlimited (with reasonable use). No authentication means we can't track per-user quotas.
+A: Unlimited (with reasonable use). Rate limit is 30 requests per minute per IP.
 
 **Q: Is this secure?**  
-A: Yes, but the API is public. Don't use it for sensitive URLs. Each short code is generated randomly (8 characters), making them impossible to guess.
+A: Yes! We use SHA-256 hashing for token storage and timing-safe comparison for verification. Your API token is as powerful as your password, so treat it like one.
 
 ---
 
