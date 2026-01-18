@@ -49,26 +49,31 @@ export default function Navigation() {
              <span className="font-bold text-xl">Uplink</span>
            </Link>
 
-           <div className="flex items-center gap-4">
-             {/* Community Links (visible to all) */}
-             <a 
-               href="https://brocode-tech.netlify.app/" 
-               target="_blank" 
-               rel="noopener noreferrer"
-               className="text-sm font-medium text-amber-700 dark:text-amber-400 hover:underline hidden sm:flex items-center gap-1"
-             >
-               BroCode
-               <ExternalLink className="w-3 h-3" />
-             </a>
-             <a 
-               href="https://events.neopanda.tech/" 
-               target="_blank" 
-               rel="noopener noreferrer"
-               className="text-sm font-medium text-amber-700 dark:text-amber-400 hover:underline hidden sm:flex items-center gap-1"
-             >
-               Events
-               <ExternalLink className="w-3 h-3" />
-             </a>
+            <div className="flex items-center gap-4">
+              {/* Docs Link */}
+              <Link href="/docs" className="text-sm font-medium text-amber-700 dark:text-amber-400 hover:underline hidden sm:block">
+                API Docs
+              </Link>
+
+              {/* Community Links (visible to all) */}
+              <a 
+                href="https://brocode-tech.netlify.app/" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="text-sm font-medium text-amber-700 dark:text-amber-400 hover:underline hidden sm:flex items-center gap-1"
+              >
+                BroCode
+                <ExternalLink className="w-3 h-3" />
+              </a>
+              <a 
+                href="https://events.neopanda.tech/" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="text-sm font-medium text-amber-700 dark:text-amber-400 hover:underline hidden sm:flex items-center gap-1"
+              >
+                Events
+                <ExternalLink className="w-3 h-3" />
+              </a>
 
              {user ? (
                <>

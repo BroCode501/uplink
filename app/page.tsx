@@ -103,7 +103,7 @@ export default function Home() {
        {/* Footer */}
        <footer className="border-t border-border bg-muted mt-12">
          <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-           <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
+           <div className="grid grid-cols-1 md:grid-cols-5 gap-8 mb-8">
              {/* About */}
              <div>
                <h3 className="font-semibold mb-4 flex items-center gap-2">
@@ -124,34 +124,49 @@ export default function Home() {
                </a>
              </div>
 
-             {/* Community */}
-             <div>
-               <h3 className="font-semibold mb-4">Community</h3>
-               <ul className="space-y-2 text-sm">
-                 <li>
-                   <a 
-                     href="https://brocode-tech.netlify.app/" 
-                     target="_blank" 
-                     rel="noopener noreferrer"
-                     className="text-amber-700 dark:text-amber-400 hover:underline flex items-center gap-1 w-fit"
-                   >
-                     BroCode Tech
-                     <ExternalLink className="w-3 h-3" />
-                   </a>
-                 </li>
-                 <li>
-                   <a 
-                     href="https://events.neopanda.tech/" 
-                     target="_blank" 
-                     rel="noopener noreferrer"
-                     className="text-amber-700 dark:text-amber-400 hover:underline flex items-center gap-1 w-fit"
-                   >
-                     Event Horizon
-                     <ExternalLink className="w-3 h-3" />
-                   </a>
-                 </li>
-               </ul>
-             </div>
+              {/* Community */}
+              <div>
+                <h3 className="font-semibold mb-4">Community</h3>
+                <ul className="space-y-2 text-sm">
+                  <li>
+                    <a 
+                      href="https://brocode-tech.netlify.app/" 
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                      className="text-amber-700 dark:text-amber-400 hover:underline flex items-center gap-1 w-fit"
+                    >
+                      BroCode Tech
+                      <ExternalLink className="w-3 h-3" />
+                    </a>
+                  </li>
+                  <li>
+                    <a 
+                      href="https://events.neopanda.tech/" 
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                      className="text-amber-700 dark:text-amber-400 hover:underline flex items-center gap-1 w-fit"
+                    >
+                      Event Horizon
+                      <ExternalLink className="w-3 h-3" />
+                    </a>
+                  </li>
+                </ul>
+              </div>
+
+              {/* API & Docs */}
+              <div>
+                <h3 className="font-semibold mb-4">API</h3>
+                <ul className="space-y-2 text-sm">
+                  <li>
+                    <Link 
+                      href="/docs"
+                      className="text-amber-700 dark:text-amber-400 hover:underline flex items-center gap-1 w-fit"
+                    >
+                      API Documentation
+                    </Link>
+                  </li>
+                </ul>
+              </div>
 
              {/* Community Projects */}
               <div>
@@ -167,7 +182,7 @@ export default function Home() {
                       Shareb.in
                       <ExternalLink className="w-3 h-3" />
                     </a>
-                    <p className="text-xs text-muted-foreground mt-1">File sharing by BroCode</p>
+                    <p className="text-xs text-muted-foreground mt-1">File sharing by Nnisarg Gada</p>
                   </li>
                   <li>
                     <a 
