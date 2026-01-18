@@ -1,7 +1,7 @@
 import Navigation from "@/components/Navigation";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
-import { Link as LinkIcon, Zap, Shield, ExternalLink } from "lucide-react";
+import { Link as LinkIcon, Zap, Shield, ExternalLink, Github } from "lucide-react";
 
 export default function Home() {
   return (
@@ -103,16 +103,25 @@ export default function Home() {
        {/* Footer */}
        <footer className="border-t border-border bg-muted mt-12">
          <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-8">
+           <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
              {/* About */}
              <div>
                <h3 className="font-semibold mb-4 flex items-center gap-2">
                  <LinkIcon className="w-5 h-5 text-amber-700 dark:text-amber-400" />
                  Uplink
                </h3>
-               <p className="text-sm text-muted-foreground">
+               <p className="text-sm text-muted-foreground mb-4">
                  A modern URL shortener built with Next.js and Supabase for the BroCode community.
                </p>
+               <a 
+                 href="https://github.com/BroCode501/uplink" 
+                 target="_blank" 
+                 rel="noopener noreferrer"
+                 className="text-amber-700 dark:text-amber-400 hover:underline flex items-center gap-2 text-sm font-medium w-fit"
+               >
+                 <Github className="w-4 h-4" />
+                 Open Source on GitHub
+               </a>
              </div>
 
              {/* Community */}
@@ -144,6 +153,25 @@ export default function Home() {
                </ul>
              </div>
 
+             {/* Community Projects */}
+             <div>
+               <h3 className="font-semibold mb-4">Community Tools</h3>
+               <ul className="space-y-2 text-sm">
+                 <li>
+                   <a 
+                     href="https://shareb.in/" 
+                     target="_blank" 
+                     rel="noopener noreferrer"
+                     className="text-amber-700 dark:text-amber-400 hover:underline flex items-center gap-1 w-fit"
+                   >
+                     Shareb.in
+                     <ExternalLink className="w-3 h-3" />
+                   </a>
+                   <p className="text-xs text-muted-foreground mt-1">File sharing by Nnisarg gada</p>
+                 </li>
+               </ul>
+             </div>
+
              {/* Tech Stack */}
              <div>
                <h3 className="font-semibold mb-4">Built With</h3>
@@ -154,7 +182,18 @@ export default function Home() {
            </div>
 
            <div className="border-t border-border pt-8 text-center text-sm text-muted-foreground">
-             <p>&copy; 2024 Uplink. Part of the BroCode Tech Community.</p>
+             <p className="mb-2">&copy; 2024 Uplink. Free and open source software by the BroCode Tech Community.</p>
+             <p className="text-xs">
+               Part of the BroCode ecosystem • 
+               <a 
+                 href="https://github.com/BroCode501/uplink" 
+                 target="_blank" 
+                 rel="noopener noreferrer"
+                 className="text-amber-700 dark:text-amber-400 hover:underline ml-1"
+               >
+                 GitHub Repository
+               </a>
+             </p>
            </div>
          </div>
        </footer>
