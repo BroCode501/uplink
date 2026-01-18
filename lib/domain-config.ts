@@ -168,16 +168,24 @@ export function getDomainStats() {
 }
 
 /**
+ * Get the primary/first allowed domain (useful for documentation/defaults)
+ */
+export function getPrimaryDomain(): string {
+  const allowedDomains = getAllowedDomains();
+  return allowedDomains[0] || 'https://meetra.live';
+}
+
+/**
  * Middleware to ensure valid domain usage
  */
 export function validateDomainMiddleware(request: Request): Response | null {
-  const domain = getCurrentDomain(request);
-  
-  if (!isAllowedDomain(domain)) {
-    console.warn(`Request from non-allowed domain: ${domain}`);
-    // Allow it anyway, but log it
-    // Return null to continue processing
-  }
-  
-  return null;
-}
+   const domain = getCurrentDomain(request);
+   
+   if (!isAllowedDomain(domain)) {
+     console.warn(`Request from non-allowed domain: ${domain}`);
+     // Allow it anyway, but log it
+     // Return null to continue processing
+   }
+   
+   return null;
+ }

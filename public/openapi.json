@@ -17,15 +17,7 @@
   "servers": [
     {
       "url": "https://meetra.live",
-      "description": "Production (Primary Domain)"
-    },
-    {
-      "url": "https://uplink.neopanda.tech",
-      "description": "Production (Alternative Domain)"
-    },
-    {
-      "url": "https://uplink-brocode.vercel.app",
-      "description": "Production (Vercel Default)"
+      "description": "Production (Default - Update with your domain)"
     },
     {
       "url": "http://localhost:3000",
@@ -82,7 +74,7 @@
                 },
                 "example": {
                   "success": true,
-                  "shortUrl": "https://meetra.live/abc123",
+                  "shortUrl": "https://your-domain.com/abc123",
                   "code": "abc123",
                   "originalUrl": "https://example.com/very/long/url",
                   "permanent": false,
@@ -298,7 +290,7 @@
             "type": "string",
             "format": "uri",
             "description": "The shortened URL",
-            "example": "https://meetra.live/abc123"
+            "example": "https://your-domain.com/abc123"
           },
           "code": {
             "type": "string",
@@ -355,11 +347,11 @@
     }
   ],
   "x-logo": {
-    "url": "https://meetra.live/logo.png",
+    "url": "https://your-domain.com/logo.png",
     "altText": "Uplink"
   },
   "externalDocs": {
     "description": "Full API Documentation",
-    "url": "https://meetra.live/docs"
+    "url": "https://your-domain.com/docs"
   }
 }

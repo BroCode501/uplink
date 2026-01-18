@@ -2,12 +2,14 @@
 
 Dead simple API for creating shortened URLs. No authentication required. Perfect for integrating Uplink into other applications.
 
+> **Note:** Replace `your-domain.com` in all examples below with your configured Uplink domain. Examples use `meetra.live` as a placeholder.
+
 ## Quick Start
 
 ### Create a Shortened URL
 
 ```bash
-curl -X POST https://meetra.live/api/v1/shorten \
+curl -X POST https://your-domain.com/api/v1/shorten \
   -H "Content-Type: application/json" \
   -d '{
     "url": "https://example.com/very/long/url"
@@ -19,7 +21,7 @@ curl -X POST https://meetra.live/api/v1/shorten \
 ```json
 {
   "success": true,
-  "shortUrl": "https://meetra.live/abc123",
+  "shortUrl": "https://your-domain.com/abc123",
   "code": "abc123",
   "originalUrl": "https://example.com/very/long/url",
   "permanent": false,
@@ -56,7 +58,7 @@ Create a shortened URL instantly.
 ```json
 {
   "success": true,
-  "shortUrl": "https://meetra.live/abc123",
+  "shortUrl": "https://your-domain.com/abc123",
   "code": "abc123",
   "originalUrl": "https://example.com/very/long/url",
   "permanent": false,
@@ -108,7 +110,7 @@ Server-side error occurred.
 ### JavaScript / Node.js
 
 ```javascript
-const response = await fetch('https://meetra.live/api/v1/shorten', {
+const response = await fetch('https://your-domain.com/api/v1/shorten', {
   method: 'POST',
   headers: {
     'Content-Type': 'application/json',
@@ -119,7 +121,7 @@ const response = await fetch('https://meetra.live/api/v1/shorten', {
 });
 
 const data = await response.json();
-console.log(data.shortUrl); // https://meetra.live/abc123
+console.log(data.shortUrl); // https://your-domain.com/abc123
 ```
 
 ### Python
@@ -127,33 +129,42 @@ console.log(data.shortUrl); // https://meetra.live/abc123
 ```python
 import requests
 
-response = requests.post('https://meetra.live/api/v1/shorten', json={
+response = requests.post('https://your-domain.com/api/v1/shorten', json={
     'url': 'https://example.com/very/long/url'
 })
 
 data = response.json()
-print(data['shortUrl'])  # https://meetra.live/abc123
+print(data['shortUrl'])  # https://your-domain.com/abc123
 ```
 
 ### PHP
 
 ```php
+<?php
 $curl = curl_init();
 
 curl_setopt_array($curl, array(
-  CURLOPT_URL => 'https://meetra.live/api/v1/shorten',
+  CURLOPT_URL => 'https://your-domain.com/api/v1/shorten',
   CURLOPT_CUSTOMREQUEST => 'POST',
   CURLOPT_POSTFIELDS => json_encode([
     'url' => 'https://example.com/very/long/url'
   ]),
   CURLOPT_HTTPHEADER => array('Content-Type: application/json'),
+  CURLOPT_RETURNTRANSFER => true,
 ));
 
 $response = curl_exec($curl);
 $data = json_decode($response, true);
-echo $data['shortUrl']; // https://meetra.live/abc123
+
+if ($data['success']) {
+    echo "Short URL: " . $data['shortUrl'] . PHP_EOL;
+    echo "Code: " . $data['code'] . PHP_EOL;
+} else {
+    echo "Error: " . $data['error'] . PHP_EOL;
+}
 
 curl_close($curl);
+?>
 ```
 
 ### Go
@@ -176,16 +187,22 @@ func main() {
 
 	body, _ := json.Marshal(payload)
 	resp, _ := http.Post(
-		"https://meetra.live/api/v1/shorten",
+		"https://your-domain.com/api/v1/shorten",
 		"application/json",
 		bytes.NewBuffer(body),
 	)
+	defer resp.Body.Close()
 
 	respBody, _ := io.ReadAll(resp.Body)
 	var data map[string]interface{}
 	json.Unmarshal(respBody, &data)
-	
-	fmt.Println(data["shortUrl"]) // https://meetra.live/abc123
+
+	if data["success"].(bool) {
+		fmt.Println("Short URL:", data["shortUrl"])
+		fmt.Println("Code:", data["code"])
+	} else {
+		fmt.Println("Error:", data["error"])
+	}
 }
 ```
 
@@ -193,12 +210,12 @@ func main() {
 
 ```bash
 # Basic usage
-curl -X POST https://meetra.live/api/v1/shorten \
+curl -X POST https://your-domain.com/api/v1/shorten \
   -H "Content-Type: application/json" \
   -d '{"url":"https://example.com/very/long/url"}'
 
 # With custom slug
-curl -X POST https://meetra.live/api/v1/shorten \
+curl -X POST https://your-domain.com/api/v1/shorten \
   -H "Content-Type: application/json" \
   -d '{
     "url":"https://example.com/very/long/url",
@@ -206,7 +223,7 @@ curl -X POST https://meetra.live/api/v1/shorten \
   }'
 
 # Permanent link
-curl -X POST https://meetra.live/api/v1/shorten \
+curl -X POST https://your-domain.com/api/v1/shorten \
   -H "Content-Type: application/json" \
   -d '{
     "url":"https://example.com/very/long/url",
@@ -234,7 +251,7 @@ await shortenUrl('https://store.com/summer-sale', {
   slug: 'summer-2025',
   permanent: true
 });
-// Link: https://meetra.live/summer-2025
+// Link: https://your-domain.com/summer-2025
 ```
 
 ### 3. Email Campaigns
@@ -328,12 +345,7 @@ A: 30 days by default. Set `permanent: true` for links that never expire.
 A: Not through the simple API. Use the authenticated dashboard to manage links.
 
 **Q: Can I use this with other Uplink domains?**  
-A: Yes! The API works from any configured domain:
-- `https://meetra.live/api/v1/shorten`
-- `https://uplink.neopanda.tech/api/v1/shorten`
-- `https://uplink-brocode.vercel.app/api/v1/shorten`
-
-All are identical.
+A: Yes! The API works from any configured domain. All configured domains are identical and use the same database. Links created on one domain work on all domains.
 
 **Q: How many links can I create?**  
 A: Unlimited (with reasonable use). No authentication means we can't track per-user quotas.

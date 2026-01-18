@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { readFileSync } from 'fs';
 import { join } from 'path';
+import { getAllowedDomains, getPrimaryDomain } from '@/lib/domain-config';
 
 export async function GET(request: NextRequest) {
   try {
@@ -9,22 +10,56 @@ export async function GET(request: NextRequest) {
     const specContent = readFileSync(specPath, 'utf-8');
     const spec = JSON.parse(specContent);
 
-    // Get current host to update servers
-    const host = request.headers.get('host') || 'meetra.live';
+    // Get configured domains
+    const allowedDomains = getAllowedDomains();
+    const primaryDomain = getPrimaryDomain();
+
+    // Get current request domain
+    const host = request.headers.get('host') || '';
     const protocol = request.headers.get('x-forwarded-proto') || 'https';
-    const currentServer = `${protocol}://${host}`;
+    const currentServer = host ? `${protocol}://${host}` : null;
 
-    // Add current server if not already present
-    const serverExists = spec.servers.some(
-      (s: { url: string }) => s.url === currentServer
-    );
+    // Build servers array
+    // Start with primary domain
+    const servers = [
+      {
+        url: primaryDomain,
+        description: 'Production (Primary Domain)',
+      },
+    ];
 
-    if (!serverExists && host !== 'localhost' && host !== 'localhost:3000') {
-      spec.servers.unshift({
+    // Add other configured domains (if not primary)
+    allowedDomains.forEach((domain) => {
+      if (domain !== primaryDomain && !servers.some((s) => s.url === domain)) {
+        servers.push({
+          url: domain,
+          description: 'Production (Alternative Domain)',
+        });
+      }
+    });
+
+    // Add current server if it's not already listed and not localhost
+    if (
+      currentServer &&
+      !servers.some((s) => s.url === currentServer) &&
+      !host?.includes('localhost')
+    ) {
+      servers.unshift({
         url: currentServer,
         description: 'Current Server',
       });
     }
+
+    // Add localhost if not present
+    if (!servers.some((s) => s.url.includes('localhost'))) {
+      servers.push({
+        url: 'http://localhost:3000',
+        description: 'Local Development',
+      });
+    }
+
+    // Update spec with actual servers
+    spec.servers = servers;
 
     const response = NextResponse.json(spec);
     response.headers.set('Content-Type', 'application/json');
