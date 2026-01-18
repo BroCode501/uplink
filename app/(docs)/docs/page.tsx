@@ -16,7 +16,7 @@ export default function DocsPage() {
             <h1 className="text-4xl sm:text-5xl font-bold mb-4">API Documentation</h1>
             <p className="text-lg text-muted-foreground max-w-2xl mb-6">
               Simple, powerful API for integrating URL shortening into your applications.
-              No authentication required.
+              Token-based authentication for secure API access.
             </p>
             <div className="flex flex-col sm:flex-row gap-3">
               <a
@@ -43,6 +43,43 @@ export default function DocsPage() {
 
         {/* Content */}
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+          {/* Authentication */}
+          <section className="mb-12">
+            <div className="flex items-center gap-3 mb-6">
+              <Code className="w-6 h-6 text-amber-700 dark:text-amber-400" />
+              <h2 className="text-3xl font-bold">Authentication</h2>
+            </div>
+
+            <div className="bg-muted p-6 rounded-lg mb-6">
+              <h3 className="font-bold mb-4">Getting Your API Token</h3>
+              <ol className="list-decimal list-inside space-y-2 text-muted-foreground mb-4">
+                <li>Sign in to your Uplink dashboard</li>
+                <li>Go to the "API Tokens" section</li>
+                <li>Click "Generate New Token"</li>
+                <li>Choose token expiration (7 days, 30 days, 90 days, 1 year, or never)</li>
+                <li>Copy your token immediately - you won't see it again!</li>
+              </ol>
+            </div>
+
+            <div className="bg-muted p-6 rounded-lg mb-6">
+              <h3 className="font-bold mb-4">Using Your Token</h3>
+              <p className="text-muted-foreground mb-4">Include the token in the Authorization header of every request:</p>
+              <CodeBlock
+                language="bash"
+                code={`Authorization: Bearer uplink_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx`}
+              />
+            </div>
+
+            <div className="bg-blue-50 dark:bg-blue-950 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
+              <p className="text-sm font-semibold text-blue-900 dark:text-blue-100 mb-2">
+                🔐 Security Tip
+              </p>
+              <p className="text-sm text-blue-800 dark:text-blue-200">
+                Your API token is as powerful as your password. Keep it secret and never commit it to version control. If compromised, generate a new token immediately.
+              </p>
+            </div>
+          </section>
+
           {/* Quick Start */}
           <section className="mb-12">
             <div className="flex items-center gap-3 mb-6">
@@ -52,12 +89,15 @@ export default function DocsPage() {
 
             <div className="bg-muted p-6 rounded-lg mb-6">
               <p className="text-muted-foreground mb-4">
-                Create a shortened URL in seconds with a single POST request:
+                Create a shortened URL in seconds with a single POST request using your API token:
               </p>
               <CodeBlock
                 language="bash"
-                code={`curl -X POST https://meetra.live/api/v1/shorten \\
+                code={`TOKEN="uplink_yse2JpXPSUKu-szJel4waiBsU6XNO0FsOgFLx8qkuwU"
+
+curl -X POST https://meetra.live/api/v1/shorten \\
   -H "Content-Type: application/json" \\
+  -H "Authorization: Bearer $TOKEN" \\
   -d '{
     "url": "https://example.com/very/long/url"
   }'`}
@@ -69,7 +109,7 @@ export default function DocsPage() {
                 💡 Tip: Try it now!
               </p>
               <p className="text-sm text-blue-800 dark:text-blue-200">
-                Copy the curl command above and run it in your terminal to create your first shortened URL.
+                Replace the TOKEN value with your actual API token, then copy the curl command and run it in your terminal to create your first shortened URL.
               </p>
             </div>
           </section>
@@ -143,26 +183,41 @@ export default function DocsPage() {
             <div className="mb-8">
               <h3 className="text-2xl font-bold mb-4">Response</h3>
 
-              <Collapsible title="201 Created - Success" defaultOpen>
-                <CodeBlock
-                  language="json"
-                  code={JSON.stringify(
-                    {
-                      success: true,
-                      shortUrl: 'https://meetra.live/abc123',
-                      code: 'abc123',
-                      originalUrl: 'https://example.com/very/long/url',
-                      permanent: false,
-                      expiresAt: '2025-01-26T19:22:05.000Z',
-                    },
-                    null,
-                    2
-                  )}
-                />
-              </Collapsible>
+               <Collapsible title="201 Created - Success" defaultOpen>
+                 <CodeBlock
+                   language="json"
+                   code={JSON.stringify(
+                     {
+                       success: true,
+                       shortUrl: 'https://meetra.live/abc123',
+                       code: 'abc123',
+                       originalUrl: 'https://example.com/very/long/url',
+                       permanent: false,
+                       expiresAt: '2025-01-26T19:22:05.000Z',
+                     },
+                     null,
+                     2
+                   )}
+                 />
+               </Collapsible>
 
-              <div className="mt-4 space-y-4">
-                <Collapsible title="400 Bad Request - Missing or Invalid URL">
+               <div className="mt-4 space-y-4">
+                 <Collapsible title="401 Unauthorized - Missing or Invalid Token">
+                   <CodeBlock
+                     language="json"
+                     code={JSON.stringify(
+                       {
+                         success: false,
+                         error:
+                           'Missing Authorization header. Use: Authorization: Bearer uplink_xxx',
+                       },
+                       null,
+                       2
+                     )}
+                   />
+                 </Collapsible>
+
+                 <Collapsible title="400 Bad Request - Missing or Invalid URL">
                   <CodeBlock
                     language="json"
                     code={JSON.stringify(
@@ -216,14 +271,17 @@ export default function DocsPage() {
             </div>
 
             <div className="space-y-6">
-              {/* JavaScript */}
-              <Collapsible title="JavaScript / Node.js" defaultOpen>
-                <CodeBlock
-                  language="javascript"
-                  code={`const response = await fetch('https://meetra.live/api/v1/shorten', {
+               {/* JavaScript */}
+               <Collapsible title="JavaScript / Node.js" defaultOpen>
+                 <CodeBlock
+                   language="javascript"
+                   code={`const token = 'uplink_your_token_here';
+
+const response = await fetch('https://meetra.live/api/v1/shorten', {
   method: 'POST',
   headers: {
     'Content-Type': 'application/json',
+    'Authorization': \`Bearer \${token}\`,
   },
   body: JSON.stringify({
     url: 'https://example.com/very/long/url',
@@ -240,23 +298,32 @@ if (data.success) {
 } else {
   console.error('Error:', data.error);
 }`}
-                />
-              </Collapsible>
+                 />
+               </Collapsible>
 
-              {/* Python */}
-              <Collapsible title="Python">
-                <CodeBlock
-                  language="python"
-                  code={`import requests
-import json
+               {/* Python */}
+               <Collapsible title="Python">
+                 <CodeBlock
+                   language="python"
+                   code={`import requests
 
-url = 'https://meetra.live/api/v1/shorten'
+token = 'uplink_your_token_here'
+headers = {
+    'Content-Type': 'application/json',
+    'Authorization': f'Bearer {token}',
+}
+
 payload = {
     'url': 'https://example.com/very/long/url',
     'permanent': False
 }
 
-response = requests.post(url, json=payload)
+response = requests.post(
+    'https://meetra.live/api/v1/shorten',
+    json=payload,
+    headers=headers
+)
+
 data = response.json()
 
 if data['success']:
@@ -265,14 +332,15 @@ if data['success']:
     print(f"Expires: {data['expiresAt']}")
 else:
     print(f"Error: {data['error']}")`}
-                />
-              </Collapsible>
+                 />
+               </Collapsible>
 
-              {/* PHP */}
-              <Collapsible title="PHP">
-                <CodeBlock
-                  language="php"
-                  code={`<?php
+               {/* PHP */}
+               <Collapsible title="PHP">
+                 <CodeBlock
+                   language="php"
+                   code={`<?php
+$token = 'uplink_your_token_here';
 $curl = curl_init();
 
 curl_setopt_array($curl, array(
@@ -282,7 +350,10 @@ curl_setopt_array($curl, array(
     'url' => 'https://example.com/very/long/url',
     'permanent' => false
   ]),
-  CURLOPT_HTTPHEADER => array('Content-Type: application/json'),
+  CURLOPT_HTTPHEADER => array(
+    'Content-Type: application/json',
+    "Authorization: Bearer $token"
+  ),
   CURLOPT_RETURNTRANSFER => true,
 ));
 
@@ -298,14 +369,14 @@ if ($data['success']) {
 
 curl_close($curl);
 ?>`}
-                />
-              </Collapsible>
+                 />
+               </Collapsible>
 
-              {/* Go */}
-              <Collapsible title="Go">
-                <CodeBlock
-                  language="go"
-                  code={`package main
+               {/* Go */}
+               <Collapsible title="Go">
+                 <CodeBlock
+                   language="go"
+                   code={`package main
 
 import (
 	"bytes"
@@ -316,17 +387,25 @@ import (
 )
 
 func main() {
+	token := "uplink_your_token_here"
+	
 	payload := map[string]interface{}{
 		"url":       "https://example.com/very/long/url",
 		"permanent": false,
 	}
 
 	body, _ := json.Marshal(payload)
-	resp, _ := http.Post(
+	req, _ := http.NewRequest(
+		"POST",
 		"https://meetra.live/api/v1/shorten",
-		"application/json",
 		bytes.NewBuffer(body),
 	)
+	
+	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", token))
+
+	client := &http.Client{}
+	resp, _ := client.Do(req)
 	defer resp.Body.Close()
 
 	respBody, _ := io.ReadAll(resp.Body)
@@ -340,21 +419,25 @@ func main() {
 		fmt.Println("Error:", data["error"])
 	}
 }`}
-                />
-              </Collapsible>
+                 />
+               </Collapsible>
 
-              {/* cURL */}
-              <Collapsible title="cURL">
-                <CodeBlock
-                  language="bash"
-                  code={`# Basic usage
+               {/* cURL */}
+               <Collapsible title="cURL">
+                 <CodeBlock
+                   language="bash"
+                   code={`TOKEN="uplink_your_token_here"
+
+# Basic usage
 curl -X POST https://meetra.live/api/v1/shorten \\
   -H "Content-Type: application/json" \\
+  -H "Authorization: Bearer $TOKEN" \\
   -d '{"url":"https://example.com/very/long/url"}'
 
 # With custom slug
 curl -X POST https://meetra.live/api/v1/shorten \\
   -H "Content-Type: application/json" \\
+  -H "Authorization: Bearer $TOKEN" \\
   -d '{
     "url":"https://example.com/very/long/url",
     "slug":"my-link"
@@ -363,23 +446,26 @@ curl -X POST https://meetra.live/api/v1/shorten \\
 # Permanent link
 curl -X POST https://meetra.live/api/v1/shorten \\
   -H "Content-Type: application/json" \\
+  -H "Authorization: Bearer $TOKEN" \\
   -d '{
     "url":"https://example.com/very/long/url",
     "permanent":true
   }'`}
-                />
-              </Collapsible>
+                 />
+               </Collapsible>
 
-              {/* Swift */}
-              <Collapsible title="Swift (iOS/macOS)">
-                <CodeBlock
-                  language="swift"
-                  code={`import Foundation
+               {/* Swift */}
+               <Collapsible title="Swift (iOS/macOS)">
+                 <CodeBlock
+                   language="swift"
+                   code={`import Foundation
 
+let token = "uplink_your_token_here"
 let url = URL(string: "https://meetra.live/api/v1/shorten")!
 var request = URLRequest(url: url)
 request.httpMethod = "POST"
 request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+request.setValue("Bearer \\(token)", forHTTPHeaderField: "Authorization")
 
 let payload: [String: Any] = [
     "url": "https://example.com/very/long/url",
@@ -403,8 +489,8 @@ URLSession.shared.dataTask(with: request) { data, response, error in
         print("Short URL: \\(shortUrl)")
     }
 }.resume()`}
-                />
-              </Collapsible>
+                 />
+               </Collapsible>
             </div>
           </section>
 
@@ -476,84 +562,99 @@ URLSession.shared.dataTask(with: request) { data, response, error in
             <h2 className="text-3xl font-bold mb-6">FAQ</h2>
 
             <div className="space-y-4">
-              {[
-                {
-                  q: 'Do I need authentication?',
-                  a: 'No! The API is completely public. Just POST your URL and get a shortened link back.',
-                },
-                {
-                  q: 'How long do temporary links last?',
-                  a: 'By default, 30 days. Set "permanent": true to create links that never expire.',
-                },
-                {
-                  q: 'Can I track analytics?',
-                  a: 'Not through the public API. Use the authenticated Uplink dashboard for detailed analytics.',
-                },
-                {
-                  q: 'Can I delete links created via the API?',
-                  a: 'Not through the public API. Links are managed through the web dashboard.',
-                },
-                {
-                  q: 'How many links can I create?',
-                  a: 'Unlimited (with reasonable use). We currently have no rate limiting, but please use responsibly.',
-                },
-                {
-                  q: 'Does it work with all Uplink domains?',
-                  a: 'Yes! Works with meetra.live, uplink.neopanda.tech, uplink-brocode.vercel.app, and any configured domain.',
-                },
-                {
-                  q: 'Is there rate limiting?',
-                  a: 'Currently no rate limiting. Please be responsible with usage.',
-                },
-                {
-                  q: 'Can I use custom domains?',
-                  a: 'Yes, configure additional domains in environment variables. The API uses the domain you POST to.',
-                },
-              ].map((item, idx) => (
-                <Collapsible key={idx} title={item.q}>
-                  <p className="text-muted-foreground">{item.a}</p>
-                </Collapsible>
-              ))}
-            </div>
+               {[
+                 {
+                   q: 'Do I need authentication?',
+                   a: 'Yes! You need an API token to use the API. Generate one in your dashboard under "API Tokens" section. The token is included in the Authorization header of every request.',
+                 },
+                 {
+                   q: 'Where do I get my API token?',
+                   a: 'Sign in to your Uplink dashboard, go to "API Tokens", and click "Generate New Token". Copy it immediately - you won\'t be able to see it again!',
+                 },
+                 {
+                   q: 'How long do my tokens last?',
+                   a: 'As long as you set them to. When generating a token, choose: 7 days, 30 days, 90 days, 1 year, or never expires.',
+                 },
+                 {
+                   q: 'What if I lose my token?',
+                   a: 'You can\'t recover it. Delete the token in your dashboard and generate a new one.',
+                 },
+                 {
+                   q: 'Can I rotate my tokens?',
+                   a: 'Yes! Generate a new token, update your apps to use it, then delete the old token.',
+                 },
+                 {
+                   q: 'How long do temporary links last?',
+                   a: 'By default, 30 days. Set "permanent": true to create links that never expire.',
+                 },
+                 {
+                   q: 'Can I track analytics?',
+                   a: 'Not through the public API. Use the authenticated Uplink dashboard for detailed analytics.',
+                 },
+                 {
+                   q: 'Can I delete links created via the API?',
+                   a: 'Not through the public API. Links are managed through the web dashboard.',
+                 },
+                 {
+                   q: 'How many links can I create?',
+                   a: 'Unlimited (with reasonable use). Rate limit is 30 requests per minute per IP address.',
+                 },
+                 {
+                   q: 'Does it work with all Uplink domains?',
+                   a: 'Yes! Works with meetra.live, uplink.neopanda.tech, uplink-brocode.vercel.app, and any configured domain.',
+                 },
+                 {
+                   q: 'Is there rate limiting?',
+                   a: 'Yes, 30 requests per minute per IP address. Check X-RateLimit-Remaining header to monitor your usage.',
+                 },
+                 {
+                   q: 'Can I use custom domains?',
+                   a: 'Yes, configure additional domains in environment variables. The API uses the domain you POST to.',
+                 },
+               ].map((item, idx) => (
+                 <Collapsible key={idx} title={item.q}>
+                   <p className="text-muted-foreground">{item.a}</p>
+                 </Collapsible>
+               ))}
+             </div>
           </section>
 
           {/* Footer CTA */}
-          <section className="bg-gradient-to-br from-amber-50 to-orange-50 dark:from-slate-900 dark:to-slate-800 rounded-lg p-8 border border-border">
-            <h2 className="text-2xl font-bold mb-4">Ready to integrate?</h2>
-            <p className="text-muted-foreground mb-6">
-              The API is live right now. Start shortening URLs with a single POST request. No
-              signup, no authentication, no friction.
-            </p>
-            <div className="flex flex-col sm:flex-row gap-4 flex-wrap">
-              <a
-                href="https://github.com/BroCode501/uplink"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-amber-700 hover:bg-amber-800 dark:bg-amber-600 dark:hover:bg-amber-700 text-white rounded-lg font-semibold transition-colors"
-              >
-                View on GitHub
-                <ExternalLink className="w-4 h-4" />
-              </a>
-              <a
-                href="/openapi.json"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-amber-700 hover:bg-amber-800 dark:bg-amber-600 dark:hover:bg-amber-700 text-white rounded-lg font-semibold transition-colors"
-              >
-                OpenAPI Spec
-                <ExternalLink className="w-4 h-4" />
-              </a>
-              <a
-                href="https://brocode-tech.netlify.app/"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center justify-center gap-2 px-6 py-3 border-2 border-amber-700 dark:border-amber-400 text-amber-700 dark:text-amber-400 hover:bg-amber-50 dark:hover:bg-slate-800 rounded-lg font-semibold transition-colors"
-              >
-                BroCode Community
-                <ExternalLink className="w-4 h-4" />
-              </a>
-            </div>
-          </section>
+           <section className="bg-gradient-to-br from-amber-50 to-orange-50 dark:from-slate-900 dark:to-slate-800 rounded-lg p-8 border border-border">
+             <h2 className="text-2xl font-bold mb-4">Ready to integrate?</h2>
+             <p className="text-muted-foreground mb-6">
+               The API is live right now. Generate your API token in the dashboard, then start shortening URLs with a single POST request. Fast, simple, and secure.
+             </p>
+             <div className="flex flex-col sm:flex-row gap-4 flex-wrap">
+               <a
+                 href="https://github.com/BroCode501/uplink"
+                 target="_blank"
+                 rel="noopener noreferrer"
+                 className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-amber-700 hover:bg-amber-800 dark:bg-amber-600 dark:hover:bg-amber-700 text-white rounded-lg font-semibold transition-colors"
+               >
+                 View on GitHub
+                 <ExternalLink className="w-4 h-4" />
+               </a>
+               <a
+                 href="/openapi.json"
+                 target="_blank"
+                 rel="noopener noreferrer"
+                 className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-amber-700 hover:bg-amber-800 dark:bg-amber-600 dark:hover:bg-amber-700 text-white rounded-lg font-semibold transition-colors"
+               >
+                 OpenAPI Spec
+                 <ExternalLink className="w-4 h-4" />
+               </a>
+               <a
+                 href="https://brocode-tech.netlify.app/"
+                 target="_blank"
+                 rel="noopener noreferrer"
+                 className="inline-flex items-center justify-center gap-2 px-6 py-3 border-2 border-amber-700 dark:border-amber-400 text-amber-700 dark:text-amber-400 hover:bg-amber-50 dark:hover:bg-slate-800 rounded-lg font-semibold transition-colors"
+               >
+                 BroCode Community
+                 <ExternalLink className="w-4 h-4" />
+               </a>
+             </div>
+           </section>
         </div>
       </main>
 
