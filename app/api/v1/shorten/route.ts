@@ -1,6 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { generateShortCode, isValidUrl, isValidCustomSlug, calculateExpiration } from "@/lib/urlShortener";
 import { NextRequest, NextResponse } from "next/server";
+import { checkRateLimit, addRateLimitHeaders, createRateLimitResponse } from "@/lib/rate-limit";
 
 /**
  * Simple Public API for creating shortened URLs
@@ -33,6 +34,16 @@ import { NextRequest, NextResponse } from "next/server";
 
 export async function POST(request: NextRequest) {
   try {
+    // Check rate limit
+    const rateLimitResult = checkRateLimit(request, {
+      maxRequests: 30,
+      windowMs: 60 * 1000, // 1 minute
+    });
+
+    if (!rateLimitResult.success) {
+      return createRateLimitResponse(rateLimitResult);
+    }
+
     const supabase = await createClient();
     const body = await request.json();
 
@@ -158,7 +169,7 @@ export async function POST(request: NextRequest) {
     const protocol = request.headers.get("x-forwarded-proto") || "https";
     const shortUrl = `${protocol}://${host}/${shortCode}`;
 
-    return NextResponse.json(
+    const response = NextResponse.json(
       {
         success: true,
         shortUrl,
@@ -169,6 +180,8 @@ export async function POST(request: NextRequest) {
       },
       { status: 201 }
     );
+
+    return addRateLimitHeaders(response, rateLimitResult);
   } catch (error) {
     console.error("API error:", error);
     return NextResponse.json(

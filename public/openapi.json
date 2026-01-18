@@ -1,0 +1,365 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "Uplink Simple API",
+    "description": "Dead simple URL shortening API. No authentication required. Create shortened URLs instantly.",
+    "version": "1.0.0",
+    "contact": {
+      "name": "BroCode Tech Community",
+      "url": "https://brocode-tech.netlify.app",
+      "email": "contact@brocode.dev"
+    },
+    "license": {
+      "name": "MIT",
+      "url": "https://github.com/BroCode501/uplink/blob/main/LICENSE"
+    }
+  },
+  "servers": [
+    {
+      "url": "https://meetra.live",
+      "description": "Production (Primary Domain)"
+    },
+    {
+      "url": "https://uplink.neopanda.tech",
+      "description": "Production (Alternative Domain)"
+    },
+    {
+      "url": "https://uplink-brocode.vercel.app",
+      "description": "Production (Vercel Default)"
+    },
+    {
+      "url": "http://localhost:3000",
+      "description": "Local Development"
+    }
+  ],
+  "paths": {
+    "/api/v1/shorten": {
+      "post": {
+        "summary": "Create a shortened URL",
+        "description": "Create a shortened URL instantly without authentication. Supports custom slugs and permanent links.",
+        "operationId": "createShortUrl",
+        "tags": ["URL Shortening"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ShortenRequest"
+              },
+              "examples": {
+                "basic": {
+                  "summary": "Basic usage (auto-generated code)",
+                  "value": {
+                    "url": "https://example.com/very/long/url"
+                  }
+                },
+                "customSlug": {
+                  "summary": "With custom slug",
+                  "value": {
+                    "url": "https://example.com/very/long/url",
+                    "slug": "my-link"
+                  }
+                },
+                "permanent": {
+                  "summary": "Permanent link (never expires)",
+                  "value": {
+                    "url": "https://example.com/very/long/url",
+                    "slug": "forever-link",
+                    "permanent": true
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successfully created shortened URL",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ShortenResponse"
+                },
+                "example": {
+                  "success": true,
+                  "shortUrl": "https://meetra.live/abc123",
+                  "code": "abc123",
+                  "originalUrl": "https://example.com/very/long/url",
+                  "permanent": false,
+                  "expiresAt": "2025-01-26T19:22:05.000Z"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request - missing or invalid URL",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                },
+                "examples": {
+                  "missingUrl": {
+                    "summary": "Missing URL field",
+                    "value": {
+                      "success": false,
+                      "error": "URL is required. Use 'url' field in request body."
+                    }
+                  },
+                  "invalidUrl": {
+                    "summary": "Invalid URL format",
+                    "value": {
+                      "success": false,
+                      "error": "Invalid URL format. Must start with http:// or https://"
+                    }
+                  },
+                  "invalidSlug": {
+                    "summary": "Invalid slug format",
+                    "value": {
+                      "success": false,
+                      "error": "Invalid slug. Use 2-50 alphanumeric characters, hyphens, or underscores."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict - custom slug is already taken",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                },
+                "example": {
+                  "success": false,
+                  "error": "This slug is already taken. Try a different one."
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Too many requests - rate limit exceeded",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                },
+                "example": {
+                  "success": false,
+                  "error": "Rate limit exceeded. Max 30 requests per minute."
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                },
+                "example": {
+                  "success": false,
+                  "error": "Internal server error. Please try again later."
+                }
+              }
+            }
+          }
+        },
+        "x-rate-limit": {
+          "requests": 30,
+          "period": "minute"
+        }
+      },
+      "get": {
+        "summary": "Get API documentation",
+        "description": "Returns information about the API endpoints and usage.",
+        "operationId": "getApiInfo",
+        "tags": ["API Info"],
+        "responses": {
+          "200": {
+            "description": "API information",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "endpoint": {
+                      "type": "string"
+                    },
+                    "description": {
+                      "type": "string"
+                    },
+                    "example": {
+                      "type": "object"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/[code]": {
+      "get": {
+        "summary": "Redirect to original URL",
+        "description": "Redirect to the original URL using the short code.",
+        "operationId": "redirectToOriginal",
+        "tags": ["URL Redirect"],
+        "parameters": [
+          {
+            "name": "code",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 2,
+              "maxLength": 50
+            },
+            "description": "The short code or custom slug"
+          }
+        ],
+        "responses": {
+          "301": {
+            "description": "Permanently redirect to original URL"
+          },
+          "302": {
+            "description": "Temporarily redirect to original URL"
+          },
+          "404": {
+            "description": "Short code not found",
+            "content": {
+              "text/html": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "410": {
+            "description": "Link has expired",
+            "content": {
+              "text/html": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "ShortenRequest": {
+        "type": "object",
+        "required": ["url"],
+        "properties": {
+          "url": {
+            "type": "string",
+            "format": "uri",
+            "description": "The URL to shorten. Must start with http:// or https://",
+            "example": "https://example.com/very/long/url"
+          },
+          "slug": {
+            "type": "string",
+            "minLength": 2,
+            "maxLength": 50,
+            "pattern": "^[a-zA-Z0-9_-]+$",
+            "description": "Custom short code. Must be 2-50 alphanumeric characters, hyphens, or underscores. Must be unique.",
+            "example": "my-link"
+          },
+          "permanent": {
+            "type": "boolean",
+            "default": false,
+            "description": "If true, link never expires. If false, expires in 30 days.",
+            "example": true
+          }
+        }
+      },
+      "ShortenResponse": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "description": "Whether the request was successful",
+            "example": true
+          },
+          "shortUrl": {
+            "type": "string",
+            "format": "uri",
+            "description": "The shortened URL",
+            "example": "https://meetra.live/abc123"
+          },
+          "code": {
+            "type": "string",
+            "description": "The short code or custom slug",
+            "example": "abc123"
+          },
+          "originalUrl": {
+            "type": "string",
+            "format": "uri",
+            "description": "The original long URL",
+            "example": "https://example.com/very/long/url"
+          },
+          "permanent": {
+            "type": "boolean",
+            "description": "Whether the link is permanent",
+            "example": false
+          },
+          "expiresAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "When the link expires (ISO 8601 format). Null if permanent.",
+            "example": "2025-01-26T19:22:05.000Z"
+          }
+        }
+      },
+      "ErrorResponse": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "example": false
+          },
+          "error": {
+            "type": "string",
+            "description": "Error message describing what went wrong",
+            "example": "Invalid URL format. Must start with http:// or https://"
+          }
+        }
+      }
+    }
+  },
+  "tags": [
+    {
+      "name": "URL Shortening",
+      "description": "Create shortened URLs instantly"
+    },
+    {
+      "name": "URL Redirect",
+      "description": "Redirect to original URLs using short codes"
+    },
+    {
+      "name": "API Info",
+      "description": "API information and documentation"
+    }
+  ],
+  "x-logo": {
+    "url": "https://meetra.live/logo.png",
+    "altText": "Uplink"
+  },
+  "externalDocs": {
+    "description": "Full API Documentation",
+    "url": "https://meetra.live/docs"
+  }
+}

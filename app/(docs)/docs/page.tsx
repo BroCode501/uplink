@@ -14,10 +14,30 @@ export default function DocsPage() {
         <div className="bg-gradient-to-r from-amber-50 to-orange-50 dark:from-slate-900 dark:to-slate-800 border-b border-border">
           <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
             <h1 className="text-4xl sm:text-5xl font-bold mb-4">API Documentation</h1>
-            <p className="text-lg text-muted-foreground max-w-2xl">
+            <p className="text-lg text-muted-foreground max-w-2xl mb-6">
               Simple, powerful API for integrating URL shortening into your applications.
               No authentication required.
             </p>
+            <div className="flex flex-col sm:flex-row gap-3">
+              <a
+                href="/openapi.json"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center justify-center gap-2 px-4 py-2 bg-amber-700 hover:bg-amber-800 dark:bg-amber-600 dark:hover:bg-amber-700 text-white rounded text-sm font-semibold transition-colors"
+              >
+                OpenAPI JSON
+                <ExternalLink className="w-4 h-4" />
+              </a>
+              <a
+                href="https://swagger.io/tools/swagger-ui/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center justify-center gap-2 px-4 py-2 border border-amber-700 dark:border-amber-400 text-amber-700 dark:text-amber-400 hover:bg-amber-50 dark:hover:bg-slate-800 rounded text-sm font-semibold transition-colors"
+              >
+                View in Swagger UI
+                <ExternalLink className="w-4 h-4" />
+              </a>
+            </div>
           </div>
         </div>
 
@@ -504,7 +524,7 @@ URLSession.shared.dataTask(with: request) { data, response, error in
               The API is live right now. Start shortening URLs with a single POST request. No
               signup, no authentication, no friction.
             </p>
-            <div className="flex flex-col sm:flex-row gap-4">
+            <div className="flex flex-col sm:flex-row gap-4 flex-wrap">
               <a
                 href="https://github.com/BroCode501/uplink"
                 target="_blank"
@@ -512,6 +532,15 @@ URLSession.shared.dataTask(with: request) { data, response, error in
                 className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-amber-700 hover:bg-amber-800 dark:bg-amber-600 dark:hover:bg-amber-700 text-white rounded-lg font-semibold transition-colors"
               >
                 View on GitHub
+                <ExternalLink className="w-4 h-4" />
+              </a>
+              <a
+                href="/openapi.json"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-amber-700 hover:bg-amber-800 dark:bg-amber-600 dark:hover:bg-amber-700 text-white rounded-lg font-semibold transition-colors"
+              >
+                OpenAPI Spec
                 <ExternalLink className="w-4 h-4" />
               </a>
               <a

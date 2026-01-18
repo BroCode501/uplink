@@ -282,9 +282,37 @@ let params = [
 
 ## Rate Limiting
 
-Currently **no rate limiting**. Please use responsibly.
+**Current Limit:** 30 requests per minute per IP address
 
-If you're creating thousands of links, contact the BroCode Tech Community.
+Rate limit information is included in response headers:
+
+```
+X-RateLimit-Limit: 30
+X-RateLimit-Remaining: 29
+X-RateLimit-Reset: 1705701125
+```
+
+When you exceed the limit, you'll receive a `429 Too Many Requests` response:
+
+```json
+{
+  "success": false,
+  "error": "Rate limit exceeded. Max 30 requests per minute."
+}
+```
+
+**What counts toward the limit?**
+- Only `POST /api/v1/shorten` requests count
+- GET requests to the documentation do not count
+- Failed requests (400, 409 errors) still count toward the limit
+
+**Tips:**
+- Implement exponential backoff in your client
+- Check `X-RateLimit-Remaining` header before making requests
+- Use `X-RateLimit-Reset` to know when your limit resets
+- For bulk operations, consider spacing requests over time
+
+If you need higher limits for legitimate use, contact the BroCode Tech Community.
 
 ---
 
