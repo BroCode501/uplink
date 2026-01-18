@@ -5,7 +5,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Copy, Trash2, Eye, Check } from "lucide-react";
 import { toast } from "sonner";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 
 interface LinkCardProps {
@@ -29,8 +29,16 @@ export default function LinkCard({
 }: LinkCardProps) {
   const [copied, setCopied] = useState(false);
   const [deleting, setDeleting] = useState(false);
+  const [shortUrlBase, setShortUrlBase] = useState("");
 
-  const shortUrl = `${process.env.NEXT_PUBLIC_SHORT_URL_BASE || "https://uplink.neopanda.tech"}/${short_code}`;
+  // Auto-detect domain on client
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      setShortUrlBase(window.location.origin);
+    }
+  }, []);
+
+  const shortUrl = shortUrlBase ? `${shortUrlBase}/${short_code}` : `https://uplink.neopanda.tech/${short_code}`;
 
   const handleCopyToClipboard = async () => {
     try {

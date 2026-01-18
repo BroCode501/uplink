@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -15,8 +15,14 @@ export default function CreateLinkForm({ onSuccess }: { onSuccess: () => void })
   const [loading, setLoading] = useState(false);
   const [createdLink, setCreatedLink] = useState<any>(null);
   const [copied, setCopied] = useState(false);
+  const [shortUrlBase, setShortUrlBase] = useState("");
 
-  const shortUrlBase = process.env.NEXT_PUBLIC_SHORT_URL_BASE || "https://uplink.neopanda.tech";
+  // Auto-detect domain on client
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      setShortUrlBase(window.location.origin);
+    }
+  }, []);
 
   const handleCreateLink = async (e: React.FormEvent) => {
     e.preventDefault();
