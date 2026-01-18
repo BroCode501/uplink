@@ -114,12 +114,12 @@ export default function CreateLinkForm({ onSuccess }: { onSuccess: () => void })
             </Badge>
           </div>
 
-          <Button
-            onClick={() => setCreatedLink(null)}
-            className="w-full"
-          >
-            Create Another
-          </Button>
+           <Button
+             onClick={() => setCreatedLink(null)}
+             className="w-full bg-amber-700 hover:bg-amber-800 dark:bg-amber-600 dark:hover:bg-amber-700"
+           >
+             Create Another
+           </Button>
         </CardContent>
       </Card>
     );
@@ -179,9 +179,9 @@ export default function CreateLinkForm({ onSuccess }: { onSuccess: () => void })
             </label>
           </div>
 
-          <Button type="submit" disabled={loading} className="w-full">
-            {loading ? "Creating..." : "Create Short Link"}
-          </Button>
+           <Button type="submit" disabled={loading} className="w-full bg-amber-700 hover:bg-amber-800 dark:bg-amber-600 dark:hover:bg-amber-700">
+             {loading ? "Creating..." : "Create Short Link"}
+           </Button>
         </form>
       </CardContent>
     </Card>

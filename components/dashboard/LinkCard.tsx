@@ -74,64 +74,65 @@ export default function LinkCard({
     year: "numeric",
   });
 
-  return (
-    <Card>
-      <CardContent className="pt-6">
-        <div className="space-y-4">
-          <div className="space-y-1">
-            <div className="flex items-start justify-between gap-2">
-              <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium text-primary hover:underline cursor-pointer truncate">
-                  {shortUrl}
-                </p>
-                <p className="text-xs text-muted-foreground truncate">
-                  {original_url}
-                </p>
-              </div>
-            </div>
-          </div>
+   return (
+     <Card className="border-l-4 border-l-amber-700 dark:border-l-amber-400">
+       <CardContent className="pt-6">
+         <div className="space-y-4">
+           <div className="space-y-1">
+             <div className="flex items-start justify-between gap-2">
+               <div className="flex-1 min-w-0">
+                 <p className="text-sm font-medium text-amber-700 dark:text-amber-400 hover:underline cursor-pointer truncate">
+                   {shortUrl}
+                 </p>
+                 <p className="text-xs text-muted-foreground truncate">
+                   {original_url}
+                 </p>
+               </div>
+             </div>
+           </div>
 
-          <div className="flex items-center justify-between flex-wrap gap-2">
-            <div className="flex items-center gap-2">
-              <Badge variant="outline">
-                <Eye className="w-3 h-3 mr-1" />
-                {click_count} clicks
-              </Badge>
-              <Badge variant={is_permanent ? "default" : "secondary"}>
-                {is_permanent ? "Permanent" : "30-day"}
-              </Badge>
-              <span className="text-xs text-muted-foreground">{createdDate}</span>
-            </div>
+           <div className="flex items-center justify-between flex-wrap gap-2">
+             <div className="flex items-center gap-2">
+               <Badge variant="outline">
+                 <Eye className="w-3 h-3 mr-1" />
+                 {click_count} clicks
+               </Badge>
+               <Badge variant={is_permanent ? "default" : "secondary"}>
+                 {is_permanent ? "Permanent" : "30-day"}
+               </Badge>
+               <span className="text-xs text-muted-foreground">{createdDate}</span>
+             </div>
 
-            <div className="flex gap-2">
-              <Link href={`/links/${id}`}>
-                <Button size="sm" variant="outline">
-                  Analytics
-                </Button>
-              </Link>
-              <Button
-                size="sm"
-                variant="outline"
-                onClick={handleCopyToClipboard}
-              >
-                {copied ? (
-                  <Check className="w-4 h-4" />
-                ) : (
-                  <Copy className="w-4 h-4" />
-                )}
-              </Button>
-              <Button
-                size="sm"
-                variant="destructive"
-                onClick={handleDelete}
-                disabled={deleting}
-              >
-                <Trash2 className="w-4 h-4" />
-              </Button>
-            </div>
-          </div>
-        </div>
-      </CardContent>
-    </Card>
-  );
+             <div className="flex gap-2">
+               <Link href={`/links/${id}`}>
+                 <Button size="sm" variant="outline" className="hover:bg-amber-50 dark:hover:bg-slate-700 hover:border-amber-700 dark:hover:border-amber-400">
+                   Analytics
+                 </Button>
+               </Link>
+               <Button
+                 size="sm"
+                 variant="outline"
+                 onClick={handleCopyToClipboard}
+                 className="hover:bg-amber-50 dark:hover:bg-slate-700 hover:border-amber-700 dark:hover:border-amber-400"
+               >
+                 {copied ? (
+                   <Check className="w-4 h-4" />
+                 ) : (
+                   <Copy className="w-4 h-4" />
+                 )}
+               </Button>
+               <Button
+                 size="sm"
+                 variant="destructive"
+                 onClick={handleDelete}
+                 disabled={deleting}
+               >
+                 <Trash2 className="w-4 h-4" />
+               </Button>
+             </div>
+           </div>
+         </div>
+       </CardContent>
+     </Card>
+   );
 }

@@ -11,7 +11,7 @@ import {
 import { createClient } from "@/lib/supabase/client";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import { LogOut, Home } from "lucide-react";
+import { LogOut, Home, ExternalLink } from "lucide-react";
 
 export default function Navigation() {
   const router = useRouter();
@@ -40,46 +40,66 @@ export default function Navigation() {
 
   if (loading) return null;
 
-  return (
-    <nav className="border-b border-border bg-background">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center h-16">
-          <Link href="/" className="flex items-center gap-2">
-            <Home className="w-6 h-6" />
-            <span className="font-bold text-xl">Uplink</span>
-          </Link>
+   return (
+     <nav className="border-b border-border bg-background">
+       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+         <div className="flex justify-between items-center h-16">
+           <Link href="/" className="flex items-center gap-2">
+             <Home className="w-6 h-6" />
+             <span className="font-bold text-xl">Uplink</span>
+           </Link>
 
-          <div className="flex items-center gap-4">
-            {user ? (
-              <>
-                <Link href="/dashboard">
-                  <Button variant="ghost">Dashboard</Button>
-                </Link>
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button variant="outline">{user.email}</Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end">
-                    <DropdownMenuItem onClick={handleLogout}>
-                      <LogOut className="w-4 h-4 mr-2" />
-                      Sign out
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              </>
-            ) : (
-              <>
-                <Link href="/login">
-                  <Button variant="ghost">Sign in</Button>
-                </Link>
-                <Link href="/signup">
-                  <Button>Sign up</Button>
-                </Link>
-              </>
-            )}
-          </div>
-        </div>
-      </div>
-    </nav>
-  );
+           <div className="flex items-center gap-4">
+             {/* Community Links (visible to all) */}
+             <a 
+               href="https://brocode-tech.netlify.app/" 
+               target="_blank" 
+               rel="noopener noreferrer"
+               className="text-sm font-medium text-amber-700 dark:text-amber-400 hover:underline hidden sm:flex items-center gap-1"
+             >
+               BroCode
+               <ExternalLink className="w-3 h-3" />
+             </a>
+             <a 
+               href="https://events.neopanda.tech/" 
+               target="_blank" 
+               rel="noopener noreferrer"
+               className="text-sm font-medium text-amber-700 dark:text-amber-400 hover:underline hidden sm:flex items-center gap-1"
+             >
+               Events
+               <ExternalLink className="w-3 h-3" />
+             </a>
+
+             {user ? (
+               <>
+                 <Link href="/dashboard">
+                   <Button variant="ghost">Dashboard</Button>
+                 </Link>
+                 <DropdownMenu>
+                   <DropdownMenuTrigger asChild>
+                     <Button variant="outline">{user.email}</Button>
+                   </DropdownMenuTrigger>
+                   <DropdownMenuContent align="end">
+                     <DropdownMenuItem onClick={handleLogout}>
+                       <LogOut className="w-4 h-4 mr-2" />
+                       Sign out
+                     </DropdownMenuItem>
+                   </DropdownMenuContent>
+                 </DropdownMenu>
+               </>
+             ) : (
+               <>
+                 <Link href="/login">
+                   <Button variant="ghost">Sign in</Button>
+                 </Link>
+                 <Link href="/signup">
+                   <Button className="bg-amber-700 hover:bg-amber-800 dark:bg-amber-600 dark:hover:bg-amber-700">Sign up</Button>
+                 </Link>
+               </>
+             )}
+           </div>
+         </div>
+       </div>
+     </nav>
+   );
 }

@@ -106,9 +106,9 @@ export default function SignupForm() {
             />
           </div>
 
-          <Button type="submit" disabled={loading} className="w-full">
-            {loading ? "Creating account..." : "Sign Up"}
-          </Button>
+           <Button type="submit" disabled={loading} className="w-full bg-amber-700 hover:bg-amber-800 dark:bg-amber-600 dark:hover:bg-amber-700">
+             {loading ? "Creating account..." : "Sign Up"}
+           </Button>
         </form>
       </CardContent>
     </Card>

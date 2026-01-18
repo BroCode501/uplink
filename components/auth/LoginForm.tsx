@@ -78,9 +78,9 @@ export default function LoginForm() {
             />
           </div>
 
-          <Button type="submit" disabled={loading} className="w-full">
-            {loading ? "Signing in..." : "Sign In"}
-          </Button>
+           <Button type="submit" disabled={loading} className="w-full bg-amber-700 hover:bg-amber-800 dark:bg-amber-600 dark:hover:bg-amber-700">
+             {loading ? "Signing in..." : "Sign In"}
+           </Button>
         </form>
       </CardContent>
     </Card>
