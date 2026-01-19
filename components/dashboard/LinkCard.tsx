@@ -3,10 +3,11 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Copy, Trash2, Eye, Check } from "lucide-react";
+import { Copy, Trash2, Eye, Check, QrCode } from "lucide-react";
 import { toast } from "sonner";
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import QRCodeModal from "./QRCodeModal";
 
 interface LinkCardProps {
   id: string;
@@ -29,6 +30,7 @@ export default function LinkCard({
 }: LinkCardProps) {
   const [copied, setCopied] = useState(false);
   const [deleting, setDeleting] = useState(false);
+  const [qrModalOpen, setQrModalOpen] = useState(false);
   const [shortUrlBase, setShortUrlBase] = useState("");
 
   // Auto-detect domain on client
@@ -83,7 +85,8 @@ export default function LinkCard({
   });
 
    return (
-     <Card className="border-l-4 border-l-amber-700 dark:border-l-amber-400">
+     <>
+      <Card className="border-l-4 border-l-amber-700 dark:border-l-amber-400">
        <CardContent className="pt-6">
          <div className="space-y-4">
            <div className="space-y-1">
@@ -111,36 +114,52 @@ export default function LinkCard({
                <span className="text-xs text-muted-foreground">{createdDate}</span>
              </div>
 
-             <div className="flex gap-2">
-               <Link href={`/links/${id}`}>
-                 <Button size="sm" variant="outline" className="hover:bg-amber-50 dark:hover:bg-slate-700 hover:border-amber-700 dark:hover:border-amber-400">
-                   Analytics
-                 </Button>
-               </Link>
-               <Button
-                 size="sm"
-                 variant="outline"
-                 onClick={handleCopyToClipboard}
-                 className="hover:bg-amber-50 dark:hover:bg-slate-700 hover:border-amber-700 dark:hover:border-amber-400"
-               >
-                 {copied ? (
-                   <Check className="w-4 h-4" />
-                 ) : (
-                   <Copy className="w-4 h-4" />
-                 )}
-               </Button>
-               <Button
-                 size="sm"
-                 variant="destructive"
-                 onClick={handleDelete}
-                 disabled={deleting}
-               >
-                 <Trash2 className="w-4 h-4" />
-               </Button>
-             </div>
-           </div>
-         </div>
-       </CardContent>
-     </Card>
-   );
+              <div className="flex gap-2">
+                <Link href={`/links/${id}`}>
+                  <Button size="sm" variant="outline" className="hover:bg-amber-50 dark:hover:bg-slate-700 hover:border-amber-700 dark:hover:border-amber-400">
+                    Analytics
+                  </Button>
+                </Link>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => setQrModalOpen(true)}
+                  className="hover:bg-amber-50 dark:hover:bg-slate-700 hover:border-amber-700 dark:hover:border-amber-400"
+                  title="Generate QR Code"
+                >
+                  <QrCode className="w-4 h-4" />
+                </Button>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={handleCopyToClipboard}
+                  className="hover:bg-amber-50 dark:hover:bg-slate-700 hover:border-amber-700 dark:hover:border-amber-400"
+                >
+                  {copied ? (
+                    <Check className="w-4 h-4" />
+                  ) : (
+                    <Copy className="w-4 h-4" />
+                  )}
+                </Button>
+                <Button
+                  size="sm"
+                  variant="destructive"
+                  onClick={handleDelete}
+                  disabled={deleting}
+                >
+                  <Trash2 className="w-4 h-4" />
+                </Button>
+              </div>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+      
+      <QRCodeModal
+        shortUrl={shortUrl}
+        open={qrModalOpen}
+        onOpenChange={setQrModalOpen}
+      />
+    </>
+    );
 }

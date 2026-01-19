@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -11,7 +12,7 @@ import {
 import { createClient } from "@/lib/supabase/client";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import { LogOut, Home, ExternalLink } from "lucide-react";
+import { LogOut, ExternalLink } from "lucide-react";
 
 export default function Navigation() {
   const router = useRouter();
@@ -41,13 +42,20 @@ export default function Navigation() {
   if (loading) return null;
 
    return (
-     <nav className="border-b border-border bg-background">
-       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-         <div className="flex justify-between items-center h-16">
-           <Link href="/" className="flex items-center gap-2">
-             <Home className="w-6 h-6" />
-             <span className="font-bold text-xl">Uplink</span>
-           </Link>
+      <nav className="border-b border-border bg-background">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-between items-center h-16">
+            <Link href="/" className="flex items-center gap-2">
+              <Image
+                src="/logo.jpg"
+                alt="BroCode Logo"
+                width={40}
+                height={40}
+                className="rounded-full"
+                priority
+              />
+              <span className="font-bold text-xl">Uplink</span>
+            </Link>
 
             <div className="flex items-center gap-4">
               {/* Docs Link */}
